@@ -12,8 +12,12 @@
 <div class="container mx-auto mt-16" id="app">
     <div>
         <label for="content" class="flex text-md font-medium text-gray-700 items-center justify-between">
-            <span>Clipboard content [ characters: <b class="text-gray-900">{{ content.length }}</b>, words: <b
-                    class="text-gray-900">{{ content.replace(/\s+/gi, ' ').split(' ').length }}</b> ]</span>
+            <span>
+                Clipboard content [
+                    characters: <b class="text-gray-900">{{ content.length }}</b>,
+                    words: <b class="text-gray-900">{{ content.length ? content.replace(/\s+/gi, ' ').split(' ').length : 0 }}</b>
+                ]
+            </span>
 
             <span>
                     <button type="button"
@@ -58,7 +62,8 @@
 
     <div class="my-4" v-for="(split, index) in splitted">
         <div class="mb-1">
-            <textarea rows="6" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">{{ split }}</textarea>
+            <textarea rows="6"
+                      class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">{{ split }}</textarea>
         </div>
         <div class="flex text-md font-medium text-gray-700 items-center justify-center">
             <button type="button"
@@ -87,6 +92,10 @@
         computed: {
             splitted: {
                 get() {
+                    if (this.content.length === 0) {
+                        return []
+                    }
+
                     return wordwrap.lines(this.content, {width: this.chars})
                 }
             }
@@ -94,7 +103,7 @@
         methods: {
             async copy(row) {
                 try {
-                    await navigator.clipboard.writeText( this.prefix + ' ' + this.splitted[row] );
+                    await navigator.clipboard.writeText(this.prefix + ' ' + this.splitted[row]);
                     console.log('Content copied to clipboard');
                 } catch (err) {
                     console.error('Failed to copy: ', err);
