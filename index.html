@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Clip</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+</head>
+<body>
+<div class="container mx-auto mt-16" id="app">
+    <div>
+        <label for="content" class="flex text-md font-medium text-gray-700 items-center justify-between">
+            <span>Clipboard content [ characters: <b class="text-gray-900">{{ content.length }}</b>, words: <b
+                    class="text-gray-900">{{ content.replace(/\s+/gi, ' ').split(' ').length }}</b> ]</span>
+
+            <span>
+                    <button type="button"
+                            @click="content = ''"
+                            class="inline-flex items-center rounded border border-transparent bg-indigo-100 px-2.5 py-1.5 text-xs font-medium text-indigo-700 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                        Clear all
+                    </button>
+                </span>
+        </label>
+        <div class="mt-1">
+            <textarea rows="6" v-model="content" id="content"
+                      class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <div class="mt-1 flex rounded-md shadow-sm">
+            <span class="inline-flex items-center rounded-l-md border border-r-0 border-gray-300 bg-gray-50 px-3 text-gray-500 sm:text-sm">number of chars</span>
+            <input type="number" v-model="chars" step="1"
+                   class="block w-full min-w-0 flex-1 rounded-none rounded-r-md border-gray-300 px-3 py-2 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+        </div>
+    </div>
+
+
+    <div class="relative my-4">
+        <div class="absolute inset-0 flex items-center" aria-hidden="true">
+            <div class="w-full border-t border-gray-300"></div>
+        </div>
+        <div class="relative flex justify-center">
+            <span class="bg-white px-2 text-sm text-gray-500">splited</span>
+        </div>
+    </div>
+
+    <div>
+        <div class="mt-1 flex rounded-md shadow-sm">
+            <span class="inline-flex items-center rounded-l-md border border-r-0 border-gray-300 bg-gray-50 px-3 text-gray-500 sm:text-sm">Prefix:</span>
+            <input type="text" id="prefix"
+                   v-model="prefix"
+                   class="block w-full min-w-0 flex-1 rounded-none rounded-r-md border-gray-300 px-3 py-2 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+        </div>
+    </div>
+
+    <div class="my-4" v-for="(split, index) in splitted">
+        <div class="mb-1">
+            <textarea rows="6" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">{{ split }}</textarea>
+        </div>
+        <div class="flex text-md font-medium text-gray-700 items-center justify-center">
+            <button type="button"
+                    @click="copy(index)"
+                    class="inline-flex items-center rounded border border-transparent bg-indigo-100 px-2.5 py-1.5 text-xs font-medium text-indigo-700 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                Copy
+            </button>
+        </div>
+    </div>
+
+
+</div>
+
+<script type="module">
+    import {createApp} from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js'
+    import wordwrap from 'https://unpkg.com/wordwrapjs@5.1.0/dist/index.mjs'
+
+    createApp({
+        data() {
+            return {
+                content: '',
+                chars: 2500,
+                prefix: 'Reply with continue and nothing else:'
+            }
+        },
+        computed: {
+            splitted: {
+                get() {
+                    return wordwrap.lines(this.content, {width: this.chars})
+                }
+            }
+        },
+        methods: {
+            async copy(row) {
+                try {
+                    await navigator.clipboard.writeText( this.prefix + ' ' + this.splitted[row] );
+                    console.log('Content copied to clipboard');
+                } catch (err) {
+                    console.error('Failed to copy: ', err);
+                }
+            }
+        }
+    }).mount('#app')
+</script>
+</body>
+</html>
