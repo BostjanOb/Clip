@@ -96,7 +96,7 @@
                         return []
                     }
 
-                    return wordwrap.lines(this.content, {width: this.chars})
+                    return wordwrap.lines(this.content, {width: this.chars, noTrim: true})
                 }
             }
         },
