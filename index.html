@@ -47,7 +47,7 @@
             <div class="w-full border-t border-gray-300"></div>
         </div>
         <div class="relative flex justify-center">
-            <span class="bg-white px-2 text-sm text-gray-500">splited</span>
+            <span class="bg-white px-2 text-sm text-gray-500">split</span>
         </div>
     </div>
 
@@ -60,16 +60,25 @@
         </div>
     </div>
 
-    <div class="my-4" v-for="(split, index) in splitted" :key="index">
-        <div class="mb-1">
+    <div class="border-b border-gray-200 pb-5 mt-5">
+        <h3 class="text-lg font-medium leading-6 text-gray-900">
+            Split - <b>[ Copied: {{ copied.length }} / {{ split.length }}]</b>
+        </h3>
+    </div>
+
+
+    <div class="my-4" v-for="(split, index) in split" :key="index">
+        <div class="flex mb-1">
+            <div class="text-gray-700 text-2xl p-2">{{ index+1 }}</div>
             <textarea rows="6"
+                      readonly
                       class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">{{ split }}</textarea>
         </div>
         <div class="flex text-md font-medium text-gray-700 items-center justify-center">
             <button type="button"
                     @click="copy(index)"
-                    :class="{'bg-blue-800 text-white': copied.includes(index)}"
-                    class="inline-flex items-center rounded border border-transparent bg-indigo-100 px-2.5 py-1.5 text-xs font-medium text-indigo-700 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                    :class="{'border-gray-300 text-gray-700 bg-white': copied.includes(index), 'border-transparent text-white bg-indigo-600 hover:bg-indigo-700': !copied.includes(index)}"
+                    class="inline-flex items-center rounded border  px-2.5 py-1.5 text-xs font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                 Copy
             </button>
         </div>
@@ -85,13 +94,13 @@
         data() {
             return {
                 content: '',
-                chars: 2500,
+                chars: 2000,
                 prefix: 'Reply with continue and nothing else:',
                 copied: []
             }
         },
         computed: {
-            splitted: {
+            split: {
                 get() {
                     if (this.content.length === 0) {
                         return []
@@ -108,12 +117,10 @@
         },
         methods: {
             async copy(row) {
-                try {
-                    await navigator.clipboard.writeText(this.prefix + ' ' + this.splitted[row]);
+                await navigator.clipboard.writeText(this.prefix + ' ' + this.split[row]);
+
+                if( !this.copied.includes(row) ) {
                     this.copied.push(row)
-                    console.log('Content copied to clipboard');
-                } catch (err) {
-                    console.error('Failed to copy: ', err);
                 }
             },
             wrapText(text, charLimit) {
