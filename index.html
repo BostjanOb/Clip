@@ -60,7 +60,7 @@
         </div>
     </div>
 
-    <div class="my-4" v-for="(split, index) in splitted">
+    <div class="my-4" v-for="(split, index) in splitted" :key="index">
         <div class="mb-1">
             <textarea rows="6"
                       class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">{{ split }}</textarea>
@@ -68,6 +68,7 @@
         <div class="flex text-md font-medium text-gray-700 items-center justify-center">
             <button type="button"
                     @click="copy(index)"
+                    :class="{'bg-blue-800 text-white': copied.includes(index)}"
                     class="inline-flex items-center rounded border border-transparent bg-indigo-100 px-2.5 py-1.5 text-xs font-medium text-indigo-700 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                 Copy
             </button>
@@ -79,14 +80,14 @@
 
 <script type="module">
     import {createApp} from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js'
-    import wordwrap from 'https://unpkg.com/wordwrapjs@5.1.0/dist/index.mjs'
 
     createApp({
         data() {
             return {
                 content: '',
                 chars: 2500,
-                prefix: 'Reply with continue and nothing else:'
+                prefix: 'Reply with continue and nothing else:',
+                copied: []
             }
         },
         computed: {
@@ -96,7 +97,12 @@
                         return []
                     }
 
-                    return wordwrap.lines(this.content, {width: this.chars, noTrim: true})
+                    let charLimit = this.chars
+                    if (charLimit > this.prefix.length) {
+                        charLimit = charLimit - this.prefix.length
+                    }
+
+                    return this.wrapText(this.content, charLimit)
                 }
             }
         },
@@ -104,10 +110,29 @@
             async copy(row) {
                 try {
                     await navigator.clipboard.writeText(this.prefix + ' ' + this.splitted[row]);
+                    this.copied.push(row)
                     console.log('Content copied to clipboard');
                 } catch (err) {
                     console.error('Failed to copy: ', err);
                 }
+            },
+            wrapText(text, charLimit) {
+                const words = text.split(" ")
+                let lines = []
+                let line = ""
+
+                for (let i = 0; i < words.length; i++) {
+                    let word = words[i]
+                    if (line.length + word.length + 1 <= charLimit) {
+                        line += " " + word
+                    } else {
+                        lines.push(line.trim())
+                        line = word
+                    }
+                }
+
+                lines.push(line.trim())
+                return lines
             }
         }
     }).mount('#app')
